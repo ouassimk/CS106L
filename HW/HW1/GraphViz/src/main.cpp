@@ -56,7 +56,7 @@ void Welcome() {
 
                 vector<Node> nodesCopy=nodes;
                 int iter=0;
-                int maxIter= 2000;
+                int maxIter= 30000;
                 while(iter<maxIter){
 
                 for(size_t i=0; i< nodes.size(); i++) {
@@ -70,8 +70,8 @@ void Welcome() {
                                         double theta = calcTheta(n0,n1);
                                         nodesCopy[i].x -= forceRepel*cos(theta);
                                         nodesCopy[i].y -= forceRepel*sin(theta);
-                                        //n1.x += forceRepel*cos(theta);
-                                        //n0.y += forceRepel*sin(theta);
+                                        nodesCopy[j].x += forceRepel*cos(theta);
+                                        nodesCopy[j].y += forceRepel*sin(theta);
 
                               //  }
                         }
@@ -82,6 +82,8 @@ void Welcome() {
                             double theta = calcTheta(n0,n2);
                             nodesCopy[i].x += forceAttract*cos(theta);
                             nodesCopy[i].y += forceAttract*sin(theta);
+                            nodesCopy[edge.end].x -= forceAttract*cos(theta);
+                            nodesCopy[edge.end].y -= forceAttract*sin(theta);
 
                           }
 
@@ -92,14 +94,26 @@ void Welcome() {
                 }
                 iter+=1;
                 nodes=nodesCopy;
+                if(iter%100==0){
                 simpleInitGraph.nodes=nodes;
                 simpleInitGraph.edges=edges;
 
                 InitGraphVisualizer(simpleInitGraph);
                 DrawGraph(simpleInitGraph);
-               // std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                }
 
 }
+
+               // simpleInitGraph.nodes=nodes;
+               // simpleInitGraph.edges=edges;
+
+               // DrawGraph(simpleInitGraph);
+               // InitGraphVisualizer(simpleInitGraph);
+
+              //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 
                 file.close();
