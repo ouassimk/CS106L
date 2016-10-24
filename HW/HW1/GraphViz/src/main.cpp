@@ -13,7 +13,7 @@ const double kAttract= 0.001;
 
 
 void Welcome();
-bool openFile(ifstream &file, string fileName);
+void openFile (ifstream &file);
 vector<Edge> getEdgesFromFile(ifstream &file);
 int getNumberNodes(ifstream &file);
 vector<Node> getNodesInitPosition(int numNodes);
@@ -32,66 +32,68 @@ int main() {
 /* Prints a message to the console welcoming the user and
  * describing the program. */
 void Welcome() {
-
+        cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
         cout << "Welcome to CS106L GraphViz!" << endl;
         cout << "This program uses a force-directed graph layout algorithm" << endl;
         cout << "to render sleek, snazzy pictures of various graphs." << endl;
-        cout << endl;
+        cout<< "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
 
-        cout<<"Please enter the source file : "<<endl;
+        cout << endl;
+        // 1- First we open the file
         ifstream file;
-        string fileName;
-        std::getline(cin,fileName);
+        openFile(file);
+
+        //2- Second we ask the user for maximum time (seconds)
         double maxTime;
         getUserTime(maxTime);
-        if(openFile(file, fileName)) {
-                cout<<getNumberNodes(file)<<endl;
-                vector<Edge> edges;
-                edges= getEdgesFromFile(file);
+        //3- we process
+        cout<<getNumberNodes(file)<<endl;
+        vector<Edge> edges;
+        edges= getEdgesFromFile(file);
 
-                vector<Node> nodes;
-                nodes= getNodesInitPosition(getNumberNodes(file));
+        vector<Node> nodes;
+        nodes= getNodesInitPosition(getNumberNodes(file));
 
-                SimpleGraph simpleInitGraph;
-                simpleInitGraph.nodes=nodes;
-                simpleInitGraph.edges=edges;
+        SimpleGraph simpleInitGraph;
+        simpleInitGraph.nodes=nodes;
+        simpleInitGraph.edges=edges;
 
-                InitGraphVisualizer(simpleInitGraph);
-                DrawGraph(simpleInitGraph);
+        InitGraphVisualizer(simpleInitGraph);
+        DrawGraph(simpleInitGraph);
 
 
-                vector<Node> nodesCopy=nodes;
-                int iter=0;
-                int maxIter= 30000;
-                while(iter<maxTime){
+        vector<Node> nodesCopy=nodes;
+        int iter=0;
+        int maxIter= 30000;
+        while(iter<maxTime) {
 
                 for(size_t i=0; i< nodes.size(); i++) {
-                      Node n0 =nodes[i];
+                        Node n0 =nodes[i];
 
                         for(size_t j=0; j < nodes.size() && j!=i; j++) {
                                 //if(n0 != n1) {
                                 Node n1 =nodes[j];
 
-                                        double forceRepel = calcForceRepel(n0,n1);
-                                        double theta = calcTheta(n0,n1);
-                                        nodesCopy[i].x -= forceRepel*cos(theta);
-                                        nodesCopy[i].y -= forceRepel*sin(theta);
-                                        nodesCopy[j].x += forceRepel*cos(theta);
-                                        nodesCopy[j].y += forceRepel*sin(theta);
+                                double forceRepel = calcForceRepel(n0,n1);
+                                double theta = calcTheta(n0,n1);
+                                nodesCopy[i].x -= forceRepel*cos(theta);
+                                nodesCopy[i].y -= forceRepel*sin(theta);
+                                nodesCopy[j].x += forceRepel*cos(theta);
+                                nodesCopy[j].y += forceRepel*sin(theta);
 
-                              //  }
+                                //  }
                         }
-                        for (Edge edge: edges){
-                          if(edge.start==i){
-                            Node n2 =nodes[edge.end];
-                            double forceAttract = calcForceAttract(n0,n2);
-                            double theta = calcTheta(n0,n2);
-                            nodesCopy[i].x += forceAttract*cos(theta);
-                            nodesCopy[i].y += forceAttract*sin(theta);
-                            nodesCopy[edge.end].x -= forceAttract*cos(theta);
-                            nodesCopy[edge.end].y -= forceAttract*sin(theta);
+                        for (Edge edge: edges) {
+                                if(edge.start==i) {
+                                        Node n2 =nodes[edge.end];
+                                        double forceAttract = calcForceAttract(n0,n2);
+                                        double theta = calcTheta(n0,n2);
+                                        nodesCopy[i].x += forceAttract*cos(theta);
+                                        nodesCopy[i].y += forceAttract*sin(theta);
+                                        nodesCopy[edge.end].x -= forceAttract*cos(theta);
+                                        nodesCopy[edge.end].y -= forceAttract*sin(theta);
 
-                          }
+                                }
 
                         }
 
@@ -100,40 +102,69 @@ void Welcome() {
                 }
                 iter+=1;
                 nodes=nodesCopy;
-                if(iter%100==0){
-                simpleInitGraph.nodes=nodes;
-                simpleInitGraph.edges=edges;
+                if(iter%100==0) {
+                        simpleInitGraph.nodes=nodes;
+                        simpleInitGraph.edges=edges;
 
-                InitGraphVisualizer(simpleInitGraph);
-                DrawGraph(simpleInitGraph);
+                        InitGraphVisualizer(simpleInitGraph);
+                        DrawGraph(simpleInitGraph);
 
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                        std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 }
 
-}
-
-               // simpleInitGraph.nodes=nodes;
-               // simpleInitGraph.edges=edges;
-
-               // DrawGraph(simpleInitGraph);
-               // InitGraphVisualizer(simpleInitGraph);
-
-              //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-
-
-                file.close();
-                return;
         }
-        cout<<"pas coool"<<endl;
+
+        // simpleInitGraph.nodes=nodes;
+        // simpleInitGraph.edges=edges;
+
+        // DrawGraph(simpleInitGraph);
+        // InitGraphVisualizer(simpleInitGraph);
+
+        //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+
+        file.close();
+        return;
+
 }
 
 
-bool openFile (ifstream &file, string fileName){
-        file.open(fileName);
-        return file.is_open();
+void openFile (ifstream &file){
+        while(true) {
+                cout<<"Please enter the source file : ";
+                string fileName;
+                std::getline(cin,fileName);
+
+                file.open(fileName);
+                if(file.is_open()) {
+                        return;
+                }
+                cout<<"Please enter a valid file name"<<endl;
+        }
 }
 
+void getUserTime(double &maxTime){
+
+        while(true) {
+repeat:
+                string maxTimeStr;
+                cout<<"Please enter the maximum time for simulation (seconds): ";
+                std::getline(cin, maxTimeStr);
+                try{
+                        maxTime= std::stod(maxTimeStr);
+                }catch(...) {
+                        goto repeat;
+                }
+                if(maxTime<=0) {
+                        cout<< "Please enter a positive value"<<endl;
+                }
+                else{
+                        return;
+                }
+        }
+
+}
 vector<Edge> getEdgesFromFile(ifstream &file){
         int _;
         _=  getNumberNodes(file);
@@ -180,24 +211,4 @@ double calcForceAttract(Node &n0, Node &n1){
 double calcTheta(Node &n0, Node &n1){
         return atan2((n1.y - n0.y),(n1.x - n0.x));
 }
-void getUserTime(double &maxTime){
 
-  while(true){
-    repeat:
-    string maxTimeStr;
-    cout<<"Please enter the maximum time for simulation (positive): ";
-    std::getline(cin, maxTimeStr);
-     try{
-       maxTime= std::stod(maxTimeStr);
-     }catch(...){
-       goto repeat;
-     }
-     if(maxTime<=0){
-       cout<< "Please enter a positive value"<<endl;
-     }
-     else{
-       return;
-     }
-  }
-
-}
