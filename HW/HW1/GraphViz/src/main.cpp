@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include <string>
+#include <ctime>
 
 using namespace std;
 const double kPi = 3.14159265358979323;
@@ -46,7 +47,7 @@ void Welcome() {
         //2- Second we ask the user for maximum time (seconds)
         double maxTime;
         getUserTime(maxTime);
-        //3- we process
+        //3- Initialise our Graph visual
         cout<<getNumberNodes(file)<<endl;
         vector<Edge> edges;
         edges= getEdgesFromFile(file);
@@ -61,17 +62,17 @@ void Welcome() {
         InitGraphVisualizer(simpleInitGraph);
         DrawGraph(simpleInitGraph);
 
-
+        // 4- We process based on the time specified
         vector<Node> nodesCopy=nodes;
-        int iter=0;
-        int maxIter= 30000;
-        while(iter<maxTime) {
+        double elapsedTime=0;
+        time_t startTime=time(NULL);
+        int iter=0; // used only for vizualization
+        while(elapsedTime<maxTime) {
 
                 for(size_t i=0; i< nodes.size(); i++) {
                         Node n0 =nodes[i];
 
                         for(size_t j=0; j < nodes.size() && j!=i; j++) {
-                                //if(n0 != n1) {
                                 Node n1 =nodes[j];
 
                                 double forceRepel = calcForceRepel(n0,n1);
@@ -81,7 +82,6 @@ void Welcome() {
                                 nodesCopy[j].x += forceRepel*cos(theta);
                                 nodesCopy[j].y += forceRepel*sin(theta);
 
-                                //  }
                         }
                         for (Edge edge: edges) {
                                 if(edge.start==i) {
@@ -98,10 +98,13 @@ void Welcome() {
                         }
 
 
-
                 }
+
+                elapsedTime=difftime(time(NULL), startTime);
                 iter+=1;
                 nodes=nodesCopy;
+
+                // This part is for visualisation of different steps
                 if(iter%100==0) {
                         simpleInitGraph.nodes=nodes;
                         simpleInitGraph.edges=edges;
@@ -112,17 +115,7 @@ void Welcome() {
 
                         std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 }
-
         }
-
-        // simpleInitGraph.nodes=nodes;
-        // simpleInitGraph.edges=edges;
-
-        // DrawGraph(simpleInitGraph);
-        // InitGraphVisualizer(simpleInitGraph);
-
-        //  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-
 
         file.close();
         return;
@@ -130,6 +123,11 @@ void Welcome() {
 }
 
 
+//================ Help Functions ========================
+/**
+ * @brief openFile : this function opens the files into a ifstream
+ * @param file     : the filestream
+ */
 void openFile (ifstream &file){
         while(true) {
                 cout<<"Please enter the source file : ";
@@ -143,6 +141,10 @@ void openFile (ifstream &file){
                 cout<<"Please enter a valid file name"<<endl;
         }
 }
+/**
+ * @brief getUserTime : to catch the user specified simulation time
+ * @param maxTime     : the value returned
+ */
 
 void getUserTime(double &maxTime){
 
@@ -165,6 +167,11 @@ repeat:
         }
 
 }
+/**
+ * @brief getEdgesFromFile
+ * @param file
+ * @return vector <Edge> of the different edges
+ */
 vector<Edge> getEdgesFromFile(ifstream &file){
         int _;
         _=  getNumberNodes(file);
@@ -180,6 +187,11 @@ vector<Edge> getEdgesFromFile(ifstream &file){
         }
         return edges;
 }
+/**
+ * @brief getNumberNodes : gets the number of nodes
+ * @param file
+ * @return numNode       : the number of nodes
+ */
 int getNumberNodes(ifstream &file){
         file.clear(); // in the case we reach a flag (end of the file for example)
         file.seekg(0, ios::beg);
@@ -188,6 +200,11 @@ int getNumberNodes(ifstream &file){
         return numNode;
 }
 
+/**
+ * @brief getNodesInitPosition : this function returns the initial positions
+ * @param numNodes
+ * @return vector<Node>
+ */
 vector<Node> getNodesInitPosition(int numNodes){
         Node node;
         vector<Node> nodes;
@@ -198,16 +215,31 @@ vector<Node> getNodesInitPosition(int numNodes){
         }
         return nodes;
 }
-
+/**
+ * @brief calcForceRepel : this function calculates the repulsive force between two nodes
+ * @param n0
+ * @param n1
+ * @return  repulsive Force
+ */
 double calcForceRepel(Node &n0, Node &n1){
         return kRepel / sqrt(pow(n1.y - n0.y,2) + pow(n1.x - n0.x, 2));
 }
-
+/**
+ * @brief calcForceAttract : this function calculate the attraction force between two nodes
+ * @param n0
+ * @param n1
+ * @return attraction force
+ */
 double calcForceAttract(Node &n0, Node &n1){
         return kAttract *(pow(n1.y - n0.y,2) + pow(n1.x - n0.x, 2));
 
 }
-
+/**
+ * @brief calcTheta : this function calculates the angle theta between two nodes.
+ * @param n0
+ * @param n1
+ * @return  angle in rad
+ */
 double calcTheta(Node &n0, Node &n1){
         return atan2((n1.y - n0.y),(n1.x - n0.x));
 }
