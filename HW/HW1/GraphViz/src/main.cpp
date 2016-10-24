@@ -4,6 +4,7 @@
 #include "SimpleGraph.h"
 #include <chrono>
 #include <thread>
+#include <string>
 
 using namespace std;
 const double kPi = 3.14159265358979323;
@@ -19,6 +20,8 @@ vector<Node> getNodesInitPosition(int numNodes);
 double calcForceRepel(Node &n0, Node &n1);
 double calcForceAttract(Node &n0, Node &n1);
 double calcTheta(Node &n0, Node &n1);
+void getUserTime(double &maxTime);
+
 // Main method
 int main() {
         Welcome();
@@ -29,15 +32,18 @@ int main() {
 /* Prints a message to the console welcoming the user and
  * describing the program. */
 void Welcome() {
-        ifstream file;
-        string fileName;
+
         cout << "Welcome to CS106L GraphViz!" << endl;
         cout << "This program uses a force-directed graph layout algorithm" << endl;
         cout << "to render sleek, snazzy pictures of various graphs." << endl;
         cout << endl;
 
         cout<<"Please enter the source file : "<<endl;
+        ifstream file;
+        string fileName;
         std::getline(cin,fileName);
+        double maxTime;
+        getUserTime(maxTime);
         if(openFile(file, fileName)) {
                 cout<<getNumberNodes(file)<<endl;
                 vector<Edge> edges;
@@ -57,7 +63,7 @@ void Welcome() {
                 vector<Node> nodesCopy=nodes;
                 int iter=0;
                 int maxIter= 30000;
-                while(iter<maxIter){
+                while(iter<maxTime){
 
                 for(size_t i=0; i< nodes.size(); i++) {
                       Node n0 =nodes[i];
@@ -117,7 +123,6 @@ void Welcome() {
 
 
                 file.close();
-                //cout<<edges.size()<<endl;
                 return;
         }
         cout<<"pas coool"<<endl;
@@ -174,4 +179,25 @@ double calcForceAttract(Node &n0, Node &n1){
 
 double calcTheta(Node &n0, Node &n1){
         return atan2((n1.y - n0.y),(n1.x - n0.x));
+}
+void getUserTime(double &maxTime){
+
+  while(true){
+    repeat:
+    string maxTimeStr;
+    cout<<"Please enter the maximum time for simulation (positive): ";
+    std::getline(cin, maxTimeStr);
+     try{
+       maxTime= std::stod(maxTimeStr);
+     }catch(...){
+       goto repeat;
+     }
+     if(maxTime<=0){
+       cout<< "Please enter a positive value"<<endl;
+     }
+     else{
+       return;
+     }
+  }
+
 }
